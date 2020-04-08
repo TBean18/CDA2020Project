@@ -5,7 +5,60 @@
 /* 10 Points */
 void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
 {
+    // Ask Prof. how the ALUControl is passed to the ALU function
 
+    unsigned ALUControlBinary;
+    // int ASCIIVal = (int)ALUControl;
+
+    //Convert char ALUControl into Binary
+    ALUControlBinary = (int)(ALUControl);
+
+    // if Add was selected or DONT CARE
+    if  (ALUControlBinary == 000){
+        *ALUresult = A + B;;
+
+        // Check for result == 0
+       
+        (*ALUresult) == (unsigned)0 ? *Zero = 1 : *Zero = 0;
+        return;
+
+    }
+ 
+    // if SUB was selected
+    // REMEMBER we are dealing with unsigned numbers, we need to account for overflow
+    else if (ALUControlBinary == 001){
+        Z =
+        *ALUresult =  A - B;
+        A < B ? Z = 1 : Z = 0;        return;
+    }
+
+    // If SLT is selected for signed numbers
+    else if (ALUControlBinary == 010){
+        A < B ? *ALUresult = 1 : *ALUresult = 0;
+        }
+
+    // SLT has been selected for Signed Numbers
+    else if(ALUControlBinary == 011){
+
+    }
+    // AND has been selected
+    else if(ALUControlBinary == 100){
+
+    }
+
+    // OR has been selected
+    else if(ALUControlBinary == 101){
+
+    }
+    // Left Shift 16 bits
+    else if(ALUControlBinary == 110){
+
+    }
+    // Z = Negation of A
+    else if(ALUControlBinary == 111){
+
+    }
+    //Asign Zero to 1 if the result is zero; otherwise, assign 0
 }
 
 /* instruction fetch */
@@ -18,6 +71,7 @@ int instruction_fetch(unsigned PC,unsigned *Mem,unsigned *instruction)
 
 /* instruction partition */
 /* 10 Points */
+// Function is used to break up the command into its constituted parts (op, r1, r2, r3, funct, offset, jsec)
 void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsigned *r2, unsigned *r3, unsigned *funct, unsigned *offset, unsigned *jsec)
 {
 
@@ -76,3 +130,7 @@ void PC_update(unsigned jsec,unsigned extended_value,char Branch,char Jump,char 
 
 }
 
+// Personally created function for assigning the zero value
+void assignZero(unsigned *ALUresult,char *Zero){
+
+}
