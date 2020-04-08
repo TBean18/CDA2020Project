@@ -15,57 +15,72 @@ void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
 
     // if Add was selected or DONT CARE
     if  (ALUControlBinary == 000){
-        *ALUresult = A + B;;
-
-        // Check for result == 0
-       
-        (*ALUresult) == (unsigned)0 ? *Zero = 1 : *Zero = 0;
-        return;
+        *ALUresult = A + B;
 
     }
  
     // if SUB was selected
     // REMEMBER we are dealing with unsigned numbers, we need to account for overflow
-    else if (ALUControlBinary == 001){
-        Z =
+    else if (ALUControlBinary == 001)
+    {
         *ALUresult =  A - B;
-        A < B ? Z = 1 : Z = 0;        return;
+     
     }
 
-    // If SLT is selected for signed numbers
-    else if (ALUControlBinary == 010){
-        A < B ? *ALUresult = 1 : *ALUresult = 0;
-        }
+    // If SLT is selected for SIGNED numbers
+    else if (ALUControlBinary == 010)
+    {
+        (A < B) ? (*ALUresult = 1) : (*ALUresult = 0);
 
-    // SLT has been selected for Signed Numbers
-    else if(ALUControlBinary == 011){
+    }
+
+    // SLT has been selected for UNSIGNED Numbers
+    else if(ALUControlBinary == 011)
+    {
+        (A < B) ? (*ALUresult = 1) : (*ALUresult = 0);
+
 
     }
     // AND has been selected
-    else if(ALUControlBinary == 100){
-
+    else if(ALUControlBinary == 100)
+    {
+        *ALUresult = A & B;
+        
     }
 
     // OR has been selected
-    else if(ALUControlBinary == 101){
+    else if(ALUControlBinary == 101)
+    {
+        *ALUresult = A | B;
 
     }
     // Left Shift 16 bits
-    else if(ALUControlBinary == 110){
-
-    }
+    else if(ALUControlBinary == 110)
+    {
+		B = B << 4;
+	}
     // Z = Negation of A
-    else if(ALUControlBinary == 111){
-
+    else if(ALUControlBinary == 111)
+    {
+        *ALUresult = ~A; 
     }
     //Asign Zero to 1 if the result is zero; otherwise, assign 0
+    ((*ALUresult) == 0) ? (*Zero = '1') : (*Zero = '0');
+    return;
 }
 
 /* instruction fetch */
 /* 10 Points */
 int instruction_fetch(unsigned PC,unsigned *Mem,unsigned *instruction)
 {
+    *instruction = Mem[PC >> 2];
 
+    if (*instruction == // Whatever it takes to halt)
+    {
+        return 1;
+    }
+    return 0;
+    
 }
 
 
@@ -83,7 +98,25 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
 /* 15 Points */
 int instruction_decode(unsigned op,struct_controls *controls)
 {
-
+    switch (op)
+    {
+    case /* constant-expression */:
+        /* code */
+        break;
+    
+    default:
+        break;
+    }
+    // Decode instruction using opcode
+    controls->RegDst;
+    controls->Jump;
+    controls->Branch;
+    controls->MemRead;
+    controls->MemtoReg;
+    controls->ALUOp;
+    controls->MemWrite;
+    controls->ALUSrc;
+    controls->RegWrite;
 }
 
 /* Read Register */
