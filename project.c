@@ -24,7 +24,6 @@ void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
     else if (ALUControlBinary == 001)
     {
         *ALUresult =  A - B;
-     
     }
 
     // If SLT is selected for SIGNED numbers
@@ -89,6 +88,15 @@ int instruction_fetch(unsigned PC,unsigned *Mem,unsigned *instruction)
 // Function is used to break up the command into its constituted parts (op, r1, r2, r3, funct, offset, jsec)
 void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsigned *r2, unsigned *r3, unsigned *funct, unsigned *offset, unsigned *jsec)
 {
+    
+
+    *op = (instruction & 0xFC000000) >> 26; // instruction [31-26]
+    *r1 = (instruction & 0x3E00000) >> 21; // instruction [25-21]
+    *r2 = (instruction & 0x1F0000) >> 16;// instruction [20-16]
+    *r3 = (instruction & 0xE000) >> 11;// instruction [15-11]
+    *funct = (instruction & 0x3F) >> 0;// instruction [5-0]
+    *offset = (instruction & 0xFFFF) >> 0;// instruction [15-0]
+    *jsec = (instruction & 0x3FFFFFF) >> 0;// instruction [25-0]
 
 }
 
@@ -100,7 +108,17 @@ int instruction_decode(unsigned op,struct_controls *controls)
 {
     switch (op)
     {
-    case /* constant-expression */:
+        //ALU will do addition or “don’t care”
+    case 000:
+        /* code */
+        break;
+    case 001:
+        /* code */
+        break;
+    case 010:
+        /* code */
+        break;
+    case 011:
         /* code */
         break;
     
@@ -123,7 +141,8 @@ int instruction_decode(unsigned op,struct_controls *controls)
 /* 5 Points */
 void read_register(unsigned r1,unsigned r2,unsigned *Reg,unsigned *data1,unsigned *data2)
 {
-
+    *data1 = Reg[r1];
+    *data2 = Reg[r2];
 }
 
 
@@ -131,14 +150,21 @@ void read_register(unsigned r1,unsigned r2,unsigned *Reg,unsigned *data1,unsigne
 /* 10 Points */
 void sign_extend(unsigned offset,unsigned *extended_value)
 {
+    // Giving and i type number that's going into offset, b/c of this,
+    // it was never in a register before, so we take the number and 
+    // extend it into a 32 bit binary value.
 
+
+    
 }
 
 /* ALU operations */
 /* 10 Points */
 int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigned funct,char ALUOp,char ALUSrc,unsigned *ALUresult,char *Zero)
 {
-
+    // ALU(unsigned A, unsigned B, char ALUControl, unsigned *ALUresult, char *Zero)
+    if (ALUsrc)
+    ALU(data1, data2, )
 }
 
 /* Read / Write Memory */
@@ -164,6 +190,7 @@ void PC_update(unsigned jsec,unsigned extended_value,char Branch,char Jump,char 
 }
 
 // Personally created function for assigning the zero value
-void assignZero(unsigned *ALUresult,char *Zero){
+void assignZero(unsigned *ALUresult,char *Zero)
+{
 
 }
