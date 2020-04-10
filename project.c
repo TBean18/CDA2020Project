@@ -34,32 +34,32 @@ void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
     }
 
     // SLT has been selected for UNSIGNED Numbers
-    else if(ALUControlBinary == 011)
+    else if (ALUControlBinary == 011)
     {
         (A < B) ? (*ALUresult = 1) : (*ALUresult = 0);
 
 
     }
     // AND has been selected
-    else if(ALUControlBinary == 100)
+    else if (ALUControlBinary == 100)
     {
         *ALUresult = A & B;
         
     }
 
     // OR has been selected
-    else if(ALUControlBinary == 101)
+    else if (ALUControlBinary == 101)
     {
         *ALUresult = A | B;
 
     }
     // Left Shift 16 bits
-    else if(ALUControlBinary == 110)
+    else if (ALUControlBinary == 110)
     {
 		B = B << 4;
 	}
     // Z = Negation of A
-    else if(ALUControlBinary == 111)
+    else if (ALUControlBinary == 111)
     {
         *ALUresult = ~A; 
     }
@@ -70,14 +70,20 @@ void ALU(unsigned A,unsigned B,char ALUControl,unsigned *ALUresult,char *Zero)
 
 /* instruction fetch */
 /* 10 Points */
+
+
+// Halt conditions for fetch are if the program counter is out of bounds of memory or if the program counter is not word-aligned, both of those should cause a halt
+// And bounds for memory is 0x0 to 0xFFFF. Anything outside that halts.
+
 int instruction_fetch(unsigned PC,unsigned *Mem,unsigned *instruction)
 {
-    *instruction = Mem[PC >> 2];
+    *instruction = Mem[PC >> 2];    
 
-    if (*instruction == // Whatever it takes to halt)
+    if ((Mem[PC >> 2] > 65535) || (PC % 4) != 0) // Whatever it takes to halt
     {
         return 1;
     }
+    
     return 0;
     
 }
@@ -90,13 +96,13 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
 {
     
 
-    *op = (instruction & 0xFC000000) >> 26; // instruction [31-26]
-    *r1 = (instruction & 0x3E00000) >> 21; // instruction [25-21]
-    *r2 = (instruction & 0x1F0000) >> 16;// instruction [20-16]
-    *r3 = (instruction & 0xE000) >> 11;// instruction [15-11]
-    *funct = (instruction & 0x3F) >> 0;// instruction [5-0]
-    *offset = (instruction & 0xFFFF) >> 0;// instruction [15-0]
-    *jsec = (instruction & 0x3FFFFFF) >> 0;// instruction [25-0]
+    *op = (instruction & 0xFC000000) >> 26;     // instruction [31-26]
+    *r1 = (instruction & 0x3E00000) >> 21;      // instruction [25-21]
+    *r2 = (instruction & 0x1F0000) >> 16;       // instruction [20-16]
+    *r3 = (instruction & 0xE000) >> 11;         // instruction [15-11]
+    *funct = (instruction & 0x3F) >> 0;         // instruction [5-0]
+    *offset = (instruction & 0xFFFF) >> 0;      // instruction [15-0]
+    *jsec = (instruction & 0x3FFFFFF) >> 0;     // instruction [25-0]
 
 }
 
@@ -104,37 +110,87 @@ void instruction_partition(unsigned instruction, unsigned *op, unsigned *r1,unsi
 
 /* instruction decode */
 /* 15 Points */
-int instruction_decode(unsigned op,struct_controls *controls)
+int instruction_decode(unsigned op, struct_controls *controls)
 {
+    // Account for the halt conditions fall under default case
+
+    // INIT all to zero and change needed singals in the swtich
+    // Decode instruction using opcode
+    controls->RegDst = '0';     // type R == 1, type I == 0
+    controls->Jump = '0';       // 1 on Jump
+    controls->Branch = '0';     // 1 on Branch
+    controls->MemRead ='0';     // 
+    controls->MemtoReg = '0';
+    controls->ALUOp = '0';
+    controls->MemWrite = '0';
+    controls->ALUSrc = '1';     // type R == 0, type I and branching == 1
+    controls->RegWrite = '0';
+
+    // OPcodes 
     switch (op)
     {
-        //ALU will do addition or “don’t care”
-    case 000:
-        /* code */
+        // ALU will do addition or “don’t care”
+
+    case 0: // ALL R-types have the same opCode of 000000 
+        controls->RegDst = '1';
+        controls->ALUOp = '7';
+        controls->RegWrite = '1';
         break;
-    case 001:
-        /* code */
+        
+    case 2: // Load word
+        controls->MemRead = '1';
+        controls->MemtoReg = '1';
+        controls->ALUSrc = '1';
         break;
-    case 010:
-        /* code */
+    // 
+    case 4: // beq Selected
+        controls->RegDst = '2';
+        controls->Branch = '1';
+        controls->MemtoReg = '2';
+        controls->ALUOp = '1';
         break;
-    case 011:
-        /* code */
+    // 
+    case 8: // addi Selected
+        controls->ALUSrc = '1';
+        controls->RegWrite = '1';
+        break;
+
+    case 10: // slti Selected
+        controls->ALUOp = '2';
+        controls->ALUSrc = '1';
+        controls->RegWrite = '1';
+        break;
+    case 11: // sltiu Selected
+        controls->ALUOp = '3';
+        controls->ALUSrc = '1';
+        controls->RegWrite = '1';
+        break;
+
+    case 15: // Load Upper Immediate Selected
+        controls->RegWrite = '1';
+        controls->ALUSrc = '1';
+        controls->ALUOp= '6';
+        break;
+        
+    case 35: // Load Word is Selected
+        controls->MemRead = '1';
+        controls->MemtoReg = '1';
+        controls->ALUSrc= '1';
+        controls->RegWrite= '1';
+        break;
+    case 43: // SW is selected
+        controls->RegDst = '2';
+        controls->MemtoReg = '2';
+        controls->MemWrite = '1';
+        controls->ALUSrc = '1';
         break;
     
-    default:
+    default: // Halt or someother error has occured
+        return 1;
         break;
     }
-    // Decode instruction using opcode
-    controls->RegDst;
-    controls->Jump;
-    controls->Branch;
-    controls->MemRead;
-    controls->MemtoReg;
-    controls->ALUOp;
-    controls->MemWrite;
-    controls->ALUSrc;
-    controls->RegWrite;
+    
+    return 0;
 }
 
 /* Read Register */
@@ -154,7 +210,22 @@ void sign_extend(unsigned offset,unsigned *extended_value)
     // it was never in a register before, so we take the number and 
     // extend it into a 32 bit binary value.
 
-
+    // If our MSB is 1 then we are NEGATIVE
+    if((offset >> 15) == 1){
+        //Since we are negative we must add 1's to the
+        // MSB index
+        // we do so by ORing it with 16 1's followed by 16 0's thereby extedning our number with 1's
+        *extended_value = offset | 0xFFFF0000;
+        return;
+    }
+    else // We are positive
+    {
+        // Here we must add 0's to the MSB
+        // We do so by ANDing with 16 0's followed by 16 1's
+        *extended_value = offset & 0x0000FFFF;
+        return;
+    }
+    
     
 }
 
@@ -163,7 +234,10 @@ void sign_extend(unsigned offset,unsigned *extended_value)
 int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigned funct,char ALUOp,char ALUSrc,unsigned *ALUresult,char *Zero)
 {
     // ALU(unsigned A, unsigned B, char ALUControl, unsigned *ALUresult, char *Zero)
-    if (ALUsrc)
+    if (ALUsrc == 1)
+    {
+        
+    }
     ALU(data1, data2, )
 }
 
@@ -171,7 +245,23 @@ int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigne
 /* 10 Points */
 int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsigned *memdata,unsigned *Mem)
 {
+    // ALU is an address, all words should be multiples of 4
+    if ((ALUresult % 4) != 0)
+    {
+        return 1;
+    }
 
+    // Write into memory
+    if (MemWrite == 1)
+    {
+        *memdata = Mem[ALUresult >> 2];
+    } 
+
+    else if (MemRead == 1)
+    {
+        Mem[ALUresult] >> 2 = data2;
+    }
+    return 0;
 }
 
 
@@ -179,18 +269,36 @@ int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsig
 /* 10 Points */
 void write_register(unsigned r2,unsigned r3,unsigned memdata,unsigned ALUresult,char RegWrite,char RegDst,char MemtoReg,unsigned *Reg)
 {
-
+    if (RegWrite == 1)
+    {
+        if (MemtoReg == 1) // Data is coming from memory
+            if (RegDst == 0)
+                Reg[r2] = memdata;
+            else
+                Reg[r3] = memdata;
+                
+        else // data is coming from ALU-result
+            if (RegDst == 0)
+                Reg[r2] = ALUresult; 
+            else
+                Reg[r3] = ALUresult;
+    } 
+    
 }
 
 /* PC update */
 /* 10 Points */
 void PC_update(unsigned jsec,unsigned extended_value,char Branch,char Jump,char Zero,unsigned *PC)
 {
-
-}
-
-// Personally created function for assigning the zero value
-void assignZero(unsigned *ALUresult,char *Zero)
-{
-
+    *PC += 4;
+    // Left shift bits of jsec by 2 and use upper 4 bits of PC
+    if (Jump == '1')
+    {
+       *PC = (jsec << 2) | (*PC & 0xf0000000) 
+    }
+    
+    if (Zero == '1' && Branch == '1')
+    {
+        *PC = (extended_value << 2);
+    }
 }
