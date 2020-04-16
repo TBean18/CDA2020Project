@@ -211,7 +211,7 @@ void sign_extend(unsigned offset,unsigned *extended_value)
     // extend it into a 32 bit binary value.
 
     // If our MSB is 1 then we are NEGATIVE
-    if((offset >> 15) == 1){
+    if ((offset >> 15) == 1){
         //Since we are negative we must add 1's to the
         // MSB index
         // we do so by ORing it with 16 1's followed by 16 0's thereby extedning our number with 1's
@@ -234,11 +234,58 @@ void sign_extend(unsigned offset,unsigned *extended_value)
 int ALU_operations(unsigned data1,unsigned data2,unsigned extended_value,unsigned funct,char ALUOp,char ALUSrc,unsigned *ALUresult,char *Zero)
 {
     // ALU(unsigned A, unsigned B, char ALUControl, unsigned *ALUresult, char *Zero)
-    if (ALUsrc == 1)
+    if (ALUOp == 7)
     {
-        
+        // If an R-type instruction, look at funct for further decoding
+        switch (funct)
+        {
+            case 0:
+                // SLL
+                ALUOp = 6;
+                break;
+            case 32:
+                // Add
+                ALUOp = 0;
+                break;
+            case 34:
+                // Sub
+                ALUOp = 1;
+                break;
+            case 36:
+                // AND
+                ALUOp = 4;
+                break;
+            case 37:
+                // OR
+                ALUOp = 5;
+                break;
+            case 39:
+                // NOR
+                printf('This case was igNORed');
+                break;
+            case 42:
+                // SLT 
+                ALUOp = 2;
+                break; 
+            case 43:
+                // Unsigned SLT
+                ALUOp = 3;
+                break;
+            default:
+                return 1;
+                break;
+        }
     }
-    ALU(data1, data2, )
+    
+    if (ALUSrc == 0)
+    {
+        ALU(data1, data2, ALUOp, ALUresult, Zero);
+    }    
+    else
+    {
+        ALU(data1, extended_value, ALUOp, ALUresult, Zero);
+    }
+    return 0;
 }
 
 /* Read / Write Memory */
@@ -252,14 +299,14 @@ int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsig
     }
 
     // Write into memory
-    if (MemWrite == 1)
+    if (MemRead == 1)
     {
         *memdata = Mem[ALUresult >> 2];
     } 
 
-    else if (MemRead == 1)
+    else if (MemWrite == 1)
     {
-        Mem[ALUresult] >> 2 = data2;
+        Mem[ALUresult >> 2] = data2;
     }
     return 0;
 }
@@ -294,7 +341,7 @@ void PC_update(unsigned jsec,unsigned extended_value,char Branch,char Jump,char 
     // Left shift bits of jsec by 2 and use upper 4 bits of PC
     if (Jump == '1')
     {
-       *PC = (jsec << 2) | (*PC & 0xf0000000) 
+       *PC = (jsec << 2) | (*PC & 0xf0000000);
     }
     
     if (Zero == '1' && Branch == '1')
