@@ -1,3 +1,9 @@
+/*
+Taylor Bean, Quynh Lac Nguyen, John Pham
+ta647999     qu404921          jo697580
+4/05/2020
+
+*/
 #include "spimcore.h"
 
 
@@ -306,7 +312,7 @@ int rw_memory(unsigned ALUresult,unsigned data2,char MemWrite,char MemRead,unsig
 /* 10 Points */
 void write_register(unsigned r2,unsigned r3,unsigned memdata,unsigned ALUresult,char RegWrite,char RegDst,char MemtoReg,unsigned *Reg)
 {
-    if (RegWrite == 1)
+    if (RegWrite == 1) //Only write if we are told to
     {
         if (MemtoReg == 1) // Data is coming from memory
         {
